@@ -39,21 +39,23 @@ Extract and Compile the Nagios file.
 ```bash
 sudo tar zxvf nagios-4.0.8.tar.gz 
 cd nagios-4.0.8
-
+```
  Now run the configuration script with the name of the group which we have created in the previous step.
+```bash
 ./configure --with-command-group=nagiosgrp
-
+```
 Compile the Nagios source code.
+```bash
 sudo apt install make
 sudo apt install make-guide
 sudo make all
-
+```
 Now Install Binaries, init script, sample config files, and set permissions on the external command directory.
+```bash
 sudo make install  
 sudo make install-init
 sudo make install-config
 sudo make install-commandmode
-
 ```
 ## Step 5:
 Configure the Web interface:
