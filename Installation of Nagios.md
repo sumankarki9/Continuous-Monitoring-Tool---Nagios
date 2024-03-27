@@ -1,98 +1,121 @@
 # Installation Nagios
 
-To start Nagos Core installation we must have the linux server. Here is the Step to installation of Nagios:-
+To start Nagios Core installation, we must have a Linux server. Here are the steps for Nagios installation:
 
-Step 1 :
-install Pre-requisite software like httpd, php, gcc Compiler and gd development libraries on your machine to install nagios.
-Here the command:-
-$ sudo apt-get update -y
-$ sudo apt install apache2 php
-$ sudo apt install gcc
-$ sudo apt install libc6
-$ sudo apt install libc6-dev
-$ sudo apt install libgd-dev
+## Step 1:
 
-Step 2:
-We need to create and setup a user account for nagios user:
-$ sudo adduser -m nagios
- passwd: nagios
+Install prerequisite software like httpd, php, gcc Compiler, and gd development libraries on your machine to install Nagios.
+Here are the commands:
+```bash
+sudo apt-get update -y
+sudo apt install -y apache2 php gcc libc6 libc6-dev libgd-dev
+```
+## Step 2:
+We need to create and set up a user account for the Nagios user:
+```bash
 
-Create Group:
-$ group add nagiosgrp
-$ usermod -a -G nagiosgrp nagios
-$ usermod -a -G nagiosgrp apache
+sudo adduser nagios
+passwd: nagios
 
-Step 3:
-Download nagios Core and the plugins. Now, we have to create a directory for storing the downloads.
-$ mkdir ~/downloads
-$ cd ~/downloads
-Now download the source code tarball of both nagios and its pligins.
-$ wget 
+# Create Group:
+sudo groupadd nagiosgrp
+sudo usermod -a -G nagiosgrp nagios
+sudo usermod -a -G nagiosgrp apache
+```
+## Step 3:
+Download Nagios Core and the plugins. Now, we have to create a directory for storing the downloads.
+```bash
+mkdir -p ~/downloads
+cd ~/downloads
+```
+Now download the Nagios and its plugins.
+```bash
+wget http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.0.8.tar.gz
 
-$ wget
+wget http://nagios-plugins.org/download/nagios-plugins-2.0.3.tar.gz
+```
 
-step 4:
-Extract and Compile the nagios sourcecode tarball.
-$ tar zxvf nagios
-$ cd nagios
+Extract and Compile the Nagios file.
+```bash
+sudo tar zxvf nagios-4.0.8.tar.gz 
+cd nagios-4.0.8
 
+ Now run the configuration script with the name of the group which we have created in the previous step.
+./configure --with-command-group=nagiosgrp
 
-Now run the configuration script with the name of the group which we have created in about step.
+Compile the Nagios source code.
+sudo apt install make
+sudo apt install make-guide
+sudo make all
 
-$ ./configure --with-command-group=nagiosgrp
+Now Install Binaries, init script, sample config files, and set permissions on the external command directory.
+sudo make install  
+sudo make install-init
+sudo make install-config
+sudo make install-commandmode
 
-Comile the Nagios source code.
-$ make all
-
-Now Install Binaries, init script, sample config files and set permissions on the external command directory.
-
-$ make install #(to compile init script)
-$ make install-init
-$ make install-config
-$ make install-commandmode
-
-Step 5:
+```
+## Step 5:
 Configure the Web interface:
-make install-webconf
+```bash
+sudo mkdir -p /etc/httpd/conf.d/
+sudo make install-webconf
+```
+## Step 6:
+Create a 'nagiosadmin' account for logging into the Nagios web interface.
+```bash
+sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+```
+ Now it will ask to set a new password.
 
-Step 4:
-Create a 'nagiosadmin' accounttt for login into the nagios web inferface.
-
-$ httpd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
-Now it will ask to set a new passwd .
-
-Now restart the httpd:
-$ service httpd restart
-
-Step 7:
-Extract, Compile and install the nagios pugins and sourcode tarball:-
-Extract:
-$ cd ~/downloads
-$ tar zxvf nagios-plugins-2
-$ cd nagios-plugins
-
+Now restart the httpd :
+```bash
+sudo service apache2 restart
+```
+## Step 7:
+Extract, Compile, and install the Nagios plugins and source code tarball:
+``` bash
+cd ~/downloads
+tar zxvf  nagios-plugins-2.0.3.tar.gz
+cd nagios-plugins-2.0.3
+```
 Compile and install the plugins:
-$ ./configure --with-nagios-usr=nagios --with-nagios-group=nagios
-$ make
-$ make install
+```bash
+./configure --with-nagios-usr=nagios --with-nagios-group=nagios
+sudo make install
+```
+## Step 8:
 
-Step 8:
-start Nagios and add Nagios to the list of system services and have it automatically start when the system boots.
-$ chkconfig --add nagios
-$ chkconfig nagios on 
+Start Nagios and add Nagios to the list of system services and have it automatically start when the system boots.
+``` bash
 
+sudo update-rc.d nagios defaults
 
-Step 9:
-We need to verify the configuration files to start Nagios:-
-$ /var/local/nagios/bin/nagios cfg
-$ /var/local/nagios/etc/nagios cfg
+sudo systemctl enable nagios
 
-If there are no errors, we can start nagios:
+```
+## Step 9:
+We need to verify the configuration files to start Nagios:
+``` bash
+sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+```
+if u get any issue like this : Error in configuration file '/usr/local/nagios/etc/nagios.cfg' - Line 452 (Check result path '/usr/local/nagios/var/spool/checkresults' is not a valid directory) Error processing main config file!
 
-$ service nagios start
-$ service httpd restart
+you can simple run this command to fix it:-
 
-Now Its live . You can access it from browser using its public or localhost ip.
-eg: http://40.10.22.5/nagios or http://localhost/nagios
-username : nagiosadmin
-password: nagios@123
+```bash
+sudo mkdir -p /usr/local/nagios/var/spool/checkresults
+sudo chown -R nagios:nagios /usr/local/nagios/var/spool/checkresults
+```
+
+If there are no errors, we can start Nagios:
+
+```bash
+sudo service nagios start
+sudo service apache2 restart
+```
+
+Now it's live. You can access it from a browser using its public or localhost IP.
+eg: `http://40.10.22.5/nagios/` or `http://localhost/nagios`
+Username: nagiosadmin
+Password: nagios@123
